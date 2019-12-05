@@ -7,120 +7,57 @@ const readInputs = () => {
 }
 
 const drawLines = (coords) => {
-  let lastCoordinate = [0, 0];
+  let coordinates = [[0, 0]];
 
-  const result = coords.map((coordinate) => {
-
+  coords.forEach((coordinate) => {
     const value = parseInt(coordinate.substr(1));
-    switch(coordinate[0]) {
+    const lastCoordinate = coordinates[coordinates.length - 1];
+      switch(coordinate[0]) {
       case 'U':
-        lastCoordinate = [lastCoordinate[0], lastCoordinate[1] + value];
-        return lastCoordinate;
-
+        for (let i = 1; i <= value; i++) {
+          coordinates.push([lastCoordinate[0], lastCoordinate[1] + i]);
+        }
+        break;
       case 'D':
-        lastCoordinate = [lastCoordinate[0], lastCoordinate[1] - value];
-        return lastCoordinate;
-
+        for (let i = 1; i <= value; i++) {
+          coordinates.push([lastCoordinate[0], lastCoordinate[1] - i]);
+        }
+        break;
       case 'L':
-        lastCoordinate = [lastCoordinate[0] - value, lastCoordinate[1]];
-        return lastCoordinate;
-
+          for (let i = 1; i <= value; i++) {
+            coordinates.push([lastCoordinate[0] - i, lastCoordinate[1]]);
+          }
+        break;
       case 'R':
-        lastCoordinate = [lastCoordinate[0] + value, lastCoordinate[1]];
-        return lastCoordinate;
+        for (let i = 1; i <= value; i++) {
+          coordinates.push([lastCoordinate[0] + i, lastCoordinate[1]]);
+        }
+        break;
     }
   })
-  result.unshift([0, 0]);
-  return result;
+  return coordinates;
 }
 
-const findIntersectionPoints = (lineOne, lineTwo) => {
-  const coordsOne = drawLines(lineOne);
-  const coordsTwo = drawLines(lineTwo);
-  let intersectionCoords = [];
+const findIntersections = () => {
+  const [lineOne, lineTwo] = readInputs();
+  const lineOneDrawn = drawLines(lineOne);
+  const lineTwoDrawn = drawLines(lineTwo);
 
-  for (let i = 0; i < coordsOne.length - 1; i++) {
-    let pointOne = coordsOne[i];
-    let pointTwo = coordsOne[i + 1];
-    const isHorizontal = pointOne[0] !== pointTwo[0] ? true : false;
+  let matches = [];
+  let indices = [];
 
-    for (let j = 0; j < coordsTwo.length - 1; j++) {
-      let jPointOne = coordsTwo[j];
-      let jPointTwo = coordsTwo[j + 1];
-      const jIsHorizontal = jPointOne[0] !== jPointTwo[0] ? true : false;
-
-      if (isHorizontal && jIsHorizontal) continue;
-      if (!isHorizontal && !jIsHorizontal) continue;
-
-      let pointOneX = pointOne[0];
-      let pointOneY = pointOne[1];
-
-      let pointTwoX = pointTwo[0];
-      let pointTwoY = pointTwo[1];
-
-      let jPointOneX = jPointOne[0];
-      let jPointOneY = jPointOne[1];
-
-      let jPointTwoX = jPointTwo[0];
-      let jPointTwoY = jPointTwo[1];
-
-      if (isHorizontal) {
-        // if the baseline is isHorizontal, that means that only the x coordinates of
-        // the baseline are changing. Inversely, that also means that the compare lines y coordinates are changing
-        if (pointOneY < jPointOneY && pointOneY > jPointTwoY) {
-          if (jPointOneX > pointOneX && jPointOneX < pointTwoX) {
-            intersectionCoords.push(Math.abs(jPointOneX) + pointOneY);
-            continue;
-          }
-          if (jPointOneX < pointOneX && jPointOneX > pointTwoX) {
-            intersectionCoords.push(Math.abs(jPointOneX) + pointOneY);
-            continue;
-          }
-        }
-        if (pointOneY > jPointOneY && pointOneY < jPointTwoY) {
-          if (jPointOneX > pointOneX && jPointOneX < pointTwoX) {
-            intersectionCoords.push(Math.abs(jPointOneX) + pointOneY);
-          }
-          if (jPointOneX < pointOneX && jPointOneX > pointTwoX) {
-            intersectionCoords.push(Math.abs(jPointOneX) + pointOneY);
-          }
-        }
-
-        // here, an intersection occurs when the compare lines y coordinates pass through the baselines x coordinates
-
-
-        // if the baseline is vertical, that means that only the y coordinates of the baseline are changing. Inversely, that also means that the compare lines x coordinates are changing.
-
-        // here, an intersection occurs when the compare lines x coordinates pass through the baselines y coordinates
-      } else {
-        if (pointOneX > jPointOneX && pointOneX < jPointTwoX) {
-          if (jPointOneY < pointOneY && jPointOneY > pointTwoY) {
-            intersectionCoords.push(Math.abs(pointOneX) + Math.abs(jPointOneY));
-            continue;
-          }
-          if (jPointOneY > pointOneY && jPointOneY < pointTwoY) {
-            intersectionCoords.push(Math.abs(pointOneX) + Math.abs(jPointOneY));
-            continue;
-          }
-        }
-
-        if (pointOneX < jPointOneX && pointOneX > jPointTwoX) {
-          if (jPointOneY < pointOneY && jPointOneY > pointTwoY) {
-            intersectionCoords.push(Math.abs(pointOneX) + Math.abs(jPointOneY));
-            continue;
-          }
-          if (jPointOneY > pointOneY && jPointOneY < pointTwoY) {
-            intersectionCoords.push(Math.abs(pointOneX) + Math.abs(jPointOneY));
-            continue;
-          }
+  for (let i = 0; i < lineOneDrawn.length; i++) {
+    for (let j = 0; j < lineTwoDrawn.length; j++) {
+      if (lineOneDrawn[i][0] === lineTwoDrawn[j][0] && lineOneDrawn[i][1] === lineTwoDrawn[j][1]) {
+        if (lineOneDrawn[i][0] !== 0 && lineOneDrawn[i][1] !== 0) {
+          matches.push(Math.abs(lineOneDrawn[i][0]) + Math.abs(lineOneDrawn[i][1]));
+          indices.push(i + j);
         }
       }
     }
   }
-  return Math.min(...intersectionCoords);
+  return [Math.min(...matches), Math.min(...indices)];
 }
-const [lineOne, lineTwo] = readInputs();
 
-const result = findIntersectionPoints(lineOne, lineTwo);
 
-console.log(result);
+console.log(findIntersections());
