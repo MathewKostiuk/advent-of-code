@@ -20,6 +20,7 @@ const getParameters = (instruction, inputs, i) => {
   let firstParameter;
   const secondMode = fullInstruction[1];
   let secondParameter;
+  const thirdParameter = inputs[i + 3];
 
   if (firstMode === '0') {
     firstParameter = inputs[inputs[i + 1]];
@@ -34,39 +35,58 @@ const getParameters = (instruction, inputs, i) => {
   }
 
   if (opcode === '03') {
-    firstParameter = 1;
+    firstParameter = 5;
   }
-  return [opcode, firstParameter, secondParameter];
+  return [opcode, firstParameter, secondParameter, thirdParameter];
 }
 
-const write = (opcode, inputs, i, firstParameter, secondParameter) => {
-
+const write = (opcode, inputs, i, firstParameter, secondParameter, thirdParameter) => {
   if (opcode === '01') {
-    inputs[inputs[i + 3]] = firstParameter + secondParameter;
+    inputs[thirdParameter] = firstParameter + secondParameter;
   } else if (opcode === '02') {
-    inputs[inputs[i + 3]] = firstParameter * secondParameter;
+    inputs[thirdParameter] = firstParameter * secondParameter;
   } else if (opcode === '03') {
     inputs[inputs[i + 1]] = firstParameter;
   } else if (opcode === '04') {
     console.log(firstParameter);
+  } else if (opcode === '07') {
+    if (firstParameter < secondParameter) {
+      inputs[thirdParameter] = 1;
+    } else {
+      inputs[thirdParameter] = 0;
+    }
+  } else if (opcode === '08') {
+    if (firstParameter === secondParameter) {
+      inputs[thirdParameter] = 1;
+    } else {
+      inputs[thirdParameter] = 0;
+    }
   } else if (opcode === '99') {
     return;
   }
 }
 
+const setinstructionPointer = (opcode, firstParameter, secondParameter, i) => {
+  if (opcode === '01' || opcode === '02' || opcode === '07' || opcode === '08') {
+    return i + 4;
+  } else if (opcode === '03' || opcode === '04') {
+    return i + 2;
+  } else if (opcode === '05') {
+    return firstParameter !== 0 ? secondParameter : i + 3;
+  } else if (opcode === '06') {
+    return firstParameter === 0 ? secondParameter : i + 3;
+  }
+}
 
 const runProgram = () => {
   let inputs = readInputs();
-  instructionSize = 4;
-  for (let i = 0; i < inputs.length; i += instructionSize) {
+  for (let i = 0; i < inputs.length; i = instructionPointer) {
     const instruction = inputs[i] + '';
-    const [opcode, firstParameter, secondParameter] = getParameters(instruction, inputs, i);
-    write(opcode, inputs, i, firstParameter, secondParameter);
-    if (opcode === '01' || opcode === '02') {
-      instructionSize = 4;
-    } else {
-      instructionSize = 2;
-    }
+    const [opcode, firstParameter, secondParameter, thirdParameter] = getParameters(instruction, inputs, i);
+
+    write(opcode, inputs, i, firstParameter, secondParameter, thirdParameter);
+    instructionPointer = setinstructionPointer(opcode, firstParameter, secondParameter, i);
+
     if (opcode ==='99') {
       break;
     }
