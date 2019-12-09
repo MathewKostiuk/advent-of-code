@@ -31,5 +31,39 @@ const countOrbits = () => {
   return counter;
 }
 
+const findSharedOrbits = () => {
+  const orbitObject = readInputs();
+  const persons = ['YOU', 'SAN'];
+  const sharedOrbits = [];
 
-console.log(countOrbits());
+  const planetsOrbitingAnother = Object.keys(orbitObject);
+
+  for (let i = 0; i < persons.length; i++) {
+    const indexOfPerson = planetsOrbitingAnother.indexOf(persons[i]);
+    const currentPlanet = planetsOrbitingAnother[indexOfPerson];
+    const personsOrbits = [];
+    let nextPlanet = orbitObject[currentPlanet];
+
+    while (nextPlanet) {
+      personsOrbits.push(nextPlanet);
+      nextPlanet = orbitObject[nextPlanet];
+    }
+    sharedOrbits.push(personsOrbits);
+  }
+  return sharedOrbits;
+}
+
+const findStepsBetweenPlanets = () => {
+  const [yourOrbits, santasOrbits] = findSharedOrbits();
+  let distance = 0;
+  for (let i = 0; i < yourOrbits.length; i++) {
+    const currentPlanet = yourOrbits[i];
+    const santasOrbitIndex = santasOrbits.indexOf(currentPlanet);
+    if (santasOrbitIndex !== -1) {
+      distance += i + santasOrbitIndex;
+      return distance;
+    }
+  }
+}
+
+console.log(findStepsBetweenPlanets());
