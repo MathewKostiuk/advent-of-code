@@ -66,4 +66,4 @@ const findStepsBetweenPlanets = () => {
   }
 }
 
-console.log(findStepsBetweenPlanets());
+console.log(countOrbits(), findStepsBetweenPlanets());
