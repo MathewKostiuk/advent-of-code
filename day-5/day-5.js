@@ -1,16 +1,14 @@
 const fs = require('fs');
 
 class Intcode {
-  constructor(phaseSetting, previousOutput, fileNumber) {
-    this.phaseSetting = phaseSetting;
-    this.previousOutput = previousOutput;
-    this.fileNumber = fileNumber
-    this.instructionPointer;
-    this.counter = 0;
+  constructor(phaseSetting) {
+    this.phaseSetting = [phaseSetting];
+    this.instructionPointer = 0;
+    this.inputs = this.readInputs();
   }
 
   readInputs() {
-    return fs.readFileSync(`./day-${this.fileNumber}`, 'utf-8')
+    return fs.readFileSync(`./day-7`, 'utf-8')
       .split(',')
       .map(input => parseInt(input));
   }
@@ -30,52 +28,46 @@ class Intcode {
     let firstParameter;
     const secondMode = fullInstruction[1];
     let secondParameter;
-    const thirdParameter = inputs[i + 3];
+    const thirdParameter = this.inputs[i + 3];
 
     if (firstMode === '0') {
-      firstParameter = inputs[inputs[i + 1]];
+      firstParameter = this.inputs[this.inputs[i + 1]];
     } else if (firstMode === '1') {
-      firstParameter = inputs[i + 1];
+      firstParameter = this.inputs[i + 1];
     }
 
     if (secondMode === '0') {
-      secondParameter = inputs[inputs[i + 2]];
+      secondParameter = this.inputs[this.inputs[i + 2]];
     } else if (secondMode === '1') {
-      secondParameter = inputs[i + 2];
+      secondParameter = this.inputs[i + 2];
     }
 
     if (opcode === '03') {
-      if (this.counter === 0) {
-        firstParameter = this.phaseSetting;
-        this.counter++;
-      } else {
-        firstParameter = this.previousOutput;
-      }
-
+      firstParameter = this.phaseSetting.shift();
     }
     return [opcode, firstParameter, secondParameter, thirdParameter];
   }
 
   write(opcode, inputs, i, firstParameter, secondParameter, thirdParameter){
     if (opcode === '01') {
-      inputs[thirdParameter] = firstParameter + secondParameter;
+      this.inputs[thirdParameter] = firstParameter + secondParameter;
     } else if (opcode === '02') {
-      inputs[thirdParameter] = firstParameter * secondParameter;
+      this.inputs[thirdParameter] = firstParameter * secondParameter;
     } else if (opcode === '03') {
-      inputs[inputs[i + 1]] = firstParameter;
+      this.inputs[this.inputs[i + 1]] = firstParameter;
     } else if (opcode === '04') {
       return firstParameter;
     } else if (opcode === '07') {
       if (firstParameter < secondParameter) {
-        inputs[thirdParameter] = 1;
+        this.inputs[thirdParameter] = 1;
       } else {
-        inputs[thirdParameter] = 0;
+        this.inputs[thirdParameter] = 0;
       }
     } else if (opcode === '08') {
       if (firstParameter === secondParameter) {
-        inputs[thirdParameter] = 1;
+        this.inputs[thirdParameter] = 1;
       } else {
-        inputs[thirdParameter] = 0;
+        this.inputs[thirdParameter] = 0;
       }
     } else if (opcode === '99') {
       return;
@@ -94,13 +86,15 @@ class Intcode {
     }
   }
 
-  runProgram(){
-    let inputs = this.readInputs();
-    for (let i = 0; i < inputs.length; i = this.instructionPointer) {
-      const instruction = inputs[i] + '';
-      const [opcode, firstParameter, secondParameter, thirdParameter] = this.getParameters(instruction, inputs, i);
+  runProgram(input){
 
-      const output = this.write(opcode, inputs, i, firstParameter, secondParameter, thirdParameter);
+    this.phaseSetting.push(input);
+
+    for (let i = 0; i < this.inputs.length; i = this.instructionPointer) {
+      const instruction = this.inputs[i] + '';
+      const [opcode, firstParameter, secondParameter, thirdParameter] = this.getParameters(instruction, this.inputs, i);
+
+      const output = this.write(opcode, this.inputs, i, firstParameter, secondParameter, thirdParameter);
       this.instructionPointer = this.setinstructionPointer(opcode, firstParameter, secondParameter, i);
       if (output) {
         return output;
@@ -109,7 +103,7 @@ class Intcode {
         break;
       }
     }
-    return inputs[0];
+    return this.inputs[0];
   }
 }
 

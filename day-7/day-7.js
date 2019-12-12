@@ -2,20 +2,20 @@ const Intcode = require('../day-5/day-5.js').Intcode;
 
 
 const amplicationCircuit = () => {
-  const allCombinations = arrayCreate([5,6,7,8,9], 5);
+  const allCombinations = arrayCreate([0,1,2,3,4], 5);
   const results = [];
   for (let i = 0; i < allCombinations.length; i++) {
     console.log(allCombinations[i]);
-    const intCodeA = new Intcode(allCombinations[i][0], 0, 7);
-    const outputA = intCodeA.runProgram();
-    const intCodeB = new Intcode(allCombinations[i][1], outputA, 7);
-    const outputB = intCodeB.runProgram();
-    const intCodeC = new Intcode(allCombinations[i][2], outputB, 7);
-    const outputC = intCodeC.runProgram();
-    const intCodeD = new Intcode(allCombinations[i][3], outputC, 7);
-    const outputD = intCodeD.runProgram();
-    const intCodeE = new Intcode(allCombinations[i][4], outputD, 7);
-    const outputE = intCodeE.runProgram();
+    const intCodeA = new Intcode(allCombinations[i][0]);
+    const outputA = intCodeA.runProgram(0);
+    const intCodeB = new Intcode(allCombinations[i][1]);
+    const outputB = intCodeB.runProgram(outputA);
+    const intCodeC = new Intcode(allCombinations[i][2]);
+    const outputC = intCodeC.runProgram(outputB);
+    const intCodeD = new Intcode(allCombinations[i][3]);
+    const outputD = intCodeD.runProgram(outputC);
+    const intCodeE = new Intcode(allCombinations[i][4]);
+    const outputE = intCodeE.runProgram(outputD);
     results.push(outputE);
   }
   return Math.max(...results);
