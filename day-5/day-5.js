@@ -5,6 +5,7 @@ class Intcode {
     this.phaseSetting = [phaseSetting];
     this.instructionPointer = 0;
     this.inputs = this.readInputs();
+    this.isRunning = true;
   }
 
   readInputs() {
@@ -21,7 +22,7 @@ class Intcode {
     return opcode;
   }
 
-  getParameters(instruction, inputs, i){
+  getParameters(instruction, i){
     const fullInstruction = this.addTrailingZeros(instruction);
     const opcode = fullInstruction.substring(3);
     const firstMode = fullInstruction[2];
@@ -48,7 +49,7 @@ class Intcode {
     return [opcode, firstParameter, secondParameter, thirdParameter];
   }
 
-  write(opcode, inputs, i, firstParameter, secondParameter, thirdParameter){
+  write(opcode, i, firstParameter, secondParameter, thirdParameter){
     if (opcode === '01') {
       this.inputs[thirdParameter] = firstParameter + secondParameter;
     } else if (opcode === '02') {
@@ -87,20 +88,22 @@ class Intcode {
   }
 
   runProgram(input){
-
     this.phaseSetting.push(input);
-
-    for (let i = 0; i < this.inputs.length; i = this.instructionPointer) {
+    for (let i = this.instructionPointer; i < this.inputs.length; i = this.instructionPointer) {
       const instruction = this.inputs[i] + '';
-      const [opcode, firstParameter, secondParameter, thirdParameter] = this.getParameters(instruction, this.inputs, i);
+      const [opcode, firstParameter, secondParameter, thirdParameter] = this.getParameters(instruction, i);
 
-      const output = this.write(opcode, this.inputs, i, firstParameter, secondParameter, thirdParameter);
+      if (opcode === '99') {
+        this.isRunning = false;
+        break;
+      }
+
+      const output = this.write(opcode, i, firstParameter, secondParameter, thirdParameter);
+
       this.instructionPointer = this.setinstructionPointer(opcode, firstParameter, secondParameter, i);
+
       if (output) {
         return output;
-      }
-      if (opcode === '99') {
-        break;
       }
     }
     return this.inputs[0];

@@ -3,22 +3,39 @@ const Intcode = require('../day-5/day-5.js').Intcode;
 
 const amplicationCircuit = () => {
   const allCombinations = arrayCreate([0,1,2,3,4], 5);
+  const allCombinationsPartTwo = arrayCreate([5, 6, 7, 8, 9], 5);
   const results = [];
-  for (let i = 0; i < allCombinations.length; i++) {
-    console.log(allCombinations[i]);
-    const intCodeA = new Intcode(allCombinations[i][0]);
-    const outputA = intCodeA.runProgram(0);
-    const intCodeB = new Intcode(allCombinations[i][1]);
-    const outputB = intCodeB.runProgram(outputA);
-    const intCodeC = new Intcode(allCombinations[i][2]);
-    const outputC = intCodeC.runProgram(outputB);
-    const intCodeD = new Intcode(allCombinations[i][3]);
-    const outputD = intCodeD.runProgram(outputC);
-    const intCodeE = new Intcode(allCombinations[i][4]);
-    const outputE = intCodeE.runProgram(outputD);
-    results.push(outputE);
+  for (let i = 0; i < allCombinationsPartTwo.length; i++) {
+    const phaseSettings = allCombinationsPartTwo[i];
+    results.push(feedbackLoop(phaseSettings));
   }
   return Math.max(...results);
+}
+
+const feedbackLoop = (phaseSettings) => {
+  let startingValue = 0;
+  let isRunning = true;
+  const outputArray = [];
+  const intcoders = initializeIntcoder(phaseSettings);
+  let lastRun = intcoders;
+
+  while (isRunning) {
+    const loop = lastRun.map((intcoder) => {
+      const output = intcoder.runProgram(startingValue);
+      startingValue = output;
+      isRunning = intcoder.isRunning;
+      outputArray.push(output);
+      return intcoder;
+    })
+    lastRun = loop;
+  }
+  return Math.max(...outputArray);
+}
+
+const initializeIntcoder = (phaseSettings) => {
+  return phaseSettings.map((phaseSetting) => {
+    return new Intcode(phaseSetting);
+  });
 }
 
 const arrayCreate = (array, size) => {
