@@ -50,29 +50,41 @@ class Intcode {
   }
 
   write(opcode, i, firstParameter, secondParameter, thirdParameter){
-    if (opcode === '01') {
-      this.inputs[thirdParameter] = firstParameter + secondParameter;
-    } else if (opcode === '02') {
-      this.inputs[thirdParameter] = firstParameter * secondParameter;
-    } else if (opcode === '03') {
-      this.inputs[this.inputs[i + 1]] = firstParameter;
-    } else if (opcode === '04') {
-      return firstParameter;
-    } else if (opcode === '07') {
-      if (firstParameter < secondParameter) {
-        this.inputs[thirdParameter] = 1;
-      } else {
-        this.inputs[thirdParameter] = 0;
+    var opcodeReducers = {
+      '01': () => {
+        this.inputs[thirdParameter] = firstParameter + secondParameter;
+        return;
+      },
+      '02': () => {
+        this.inputs[thirdParameter] = firstParameter * secondParameter;
+        return;
+      },
+      '03': () => {
+        this.inputs[this.inputs[i + 1]] = firstParameter;
+        return;
+      },
+      '04': () => {
+        return firstParameter;
+      },
+      '05': () => {
+        return;
+      },
+      '06': () => {
+        return;
+      },
+      '07': () => {
+        this.inputs[thirdParameter] = firstParameter < secondParameter ? 1 : 0;
+        return;
+      },
+      '08': () => {
+        this.inputs[thirdParameter] = firstParameter === secondParameter ? 1 : 0;
+        return;
+      },
+      '99': () => {
+        return;
       }
-    } else if (opcode === '08') {
-      if (firstParameter === secondParameter) {
-        this.inputs[thirdParameter] = 1;
-      } else {
-        this.inputs[thirdParameter] = 0;
-      }
-    } else if (opcode === '99') {
-      return;
     }
+    return opcodeReducers[opcode]();
   }
 
   setinstructionPointer(opcode, firstParameter, secondParameter, i){
