@@ -146,12 +146,13 @@ class Intcode {
       const output = this.write(opcode, i, firstParameter, secondParameter, thirdParameter, firstAddress);
       this.instructionPointer = this.setinstructionPointer(opcode, firstParameter, secondParameter, i);
       if (output) {
-        console.log(output);
+        // console.log(output);
+        return output;
       }
     }
-    return this.inputs[0];
+    // return this.inputs[0];
   }
 }
 
-const intcode = new Intcode(1);
+const intcode = new Intcode(2);
 console.log(intcode.runProgram());
